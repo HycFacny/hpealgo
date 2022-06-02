@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/data4/huangyuchao/projects/projects/hpealgo'
+cd lib/utils/nms; python setup_linux.py build_ext --inplace; rm -rf build; cd ../../../
+make: Leaving directory '/data4/huangyuchao/projects/projects/hpealgo'
+ 
