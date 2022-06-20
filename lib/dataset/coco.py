@@ -13,8 +13,8 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
 from .dataset_base import JointsDataset
-# from nms.nms import oks_nms
-# from nms.nms import soft_nms_nms
+from utils.nms.nms import oks_nms
+from utils.nms.nms import soft_oks_nms
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ class COCODataset(JointsDataset):
     def _image_path_from_index(self, index):
         '''
             e.g. dataset_root / train2017 / index.jpg
-            return:ß
+            return:
                 image_path: str
         '''
         file_name = '%012d.jpg' % index
@@ -328,7 +328,7 @@ class COCODataset(JointsDataset):
         results = self._load_coco_keypoint_results_percat_kernel(pack[0])
         logger.info(f'=> writing results to {res_file}')
 
-        with open('res_file', 'w') as f:
+        with open(res_file, 'w') as f:
             json.dump(results, f, sort_keys=True, indent=4)
         
         # already existing result file
@@ -353,18 +353,20 @@ class COCODataset(JointsDataset):
             num_bboxes = len(image_res_pack)
             if num_bboxes <= 0: continue        # no bbox in this image
 
+            # print(num_bboxes)
             # load all keypoints of this image to temp db
-            _bbox_kpts = np.array(image_keypoint_pack[bbox_idx]['keypoints'] \
-                for bbox_idx in range(num_bboxes))
+            _bbox_kpts = np.array([
+                image_res_pack[bbox_idx]['keypoints'] for bbox_idx in range(num_bboxes)
+            ])
 
-            bbox_kpts = np.zeros( (bbox_kpts.shape[0], self.num_joints * 3), dtype=np.float32)
+            bbox_kpts = np.zeros( (_bbox_kpts.shape[0], self.num_joints * 3), dtype=np.float32)
 
             for kpt in range(self.num_joints):
                 # zip keypoint, axis 3 is the keypoint score
                 bbox_kpts[:, kpt * 3 + 0 : kpt * 3 + 3] = _bbox_kpts[:, kpt, 0 : 3]
 
             result = [{
-                'image_id' : image_res_pack['image'],
+                'image_id' : image_res_pack[bbox_idx]['image'],
                 'category_id': cat_id,
                 'keypoints': list(bbox_kpts[bbox_idx]),
                 'score': image_res_pack[bbox_idx]['score'],
@@ -377,7 +379,7 @@ class COCODataset(JointsDataset):
         return cat_result
 
     # use cocoeval tools to evaluate
-    def _do_python_keypoint_eval(self, res_file, res_folder):
+    def _do_python_keypoint_eval(self, res_file):
         coco_dt = self.coco.loadRes(res_file)
         coco_eval = COCOeval(self.coco, coco_dt, 'keypoints')
         coco_eval.params.useSegm = None
@@ -389,7 +391,7 @@ class COCODataset(JointsDataset):
 
         info_string = []
         for idx, name in enumerate(stats_names):
-            info_string.append( (name, coco_eval.stats(idx)) )
+            info_string.append( (name, coco_eval.stats[idx]) )
         
         return info_string
     
@@ -397,11 +399,25 @@ class COCODataset(JointsDataset):
     #####################################################################
     ''' evaluate func for validating and testing '''
     #####################################################################
-    def evaluate(self, cfg, preds, output_dir, all_boxes, image_path,
-                 *args, **kwargs):
-        '''
-
-        '''
+    def evaluate(self, cfg, preds, output_dir, all_boxes, image_path, *args, **kwargs):
+        """
+        Evaluate func for validating and testing
+        
+        Args:
+            cfg ( cfg ): Network and dataset configs
+            preds ( ndarray(batch_size, num_joints, 2) )
+                Final preds with order (height, width)
+            output_dir ( String ): Output directory
+            all_boxes ( ndarray(batch_size * num_joints, 6) ):
+                All boxes info, 0~1: center, 2~3: scale, 4: area, 5: score
+            image_path ( List(batch_size) ): Image path
+                e.g. ['/home/huangyuchao/projects/datasets/coco2017/images/val2017/000000397133.jpg', ...]
+            
+        Returns:
+            name_values ():
+            perf_indicator ():
+        """
+        # setting result files
         rank = cfg.RANK
         res_folder = Path(output_dir) / 'results'
         if not res_folder.exists():
@@ -409,13 +425,17 @@ class COCODataset(JointsDataset):
                 res_folder.mkdir()
             except Exception:
                 logger.error(f'Fail to create {res_folder}')
-        
-        res_file = res_folder / 'keypoints_{}_results_{}.json'.format(
-            self.image_set, rank
-        )
+        res_file = str(res_folder / 'keypoints_{}_results_{}.json'.format(self.image_set, rank))
 
-        # person x keypoints
+        # {person box: keypoints} with image_name
         kpt_all = []
+        preds = preds[:4]
+        all_boxes = all_boxes[:4]
+        
+        # print(preds.shape)
+        # print(all_boxes.shape)
+        # print(len(image_path))
+        
         for idx, kpt in enumerate(preds):
             kpt_all.append({
                 'keypoints': kpt,
@@ -426,57 +446,57 @@ class COCODataset(JointsDataset):
                 'image': int(image_path[idx][ -16 : -4 ])
             })
         
-        # image x person x keypoints
-        keypoints = []
-        for kpt in kpt_all:
-            keypoints[kpt['image']].append(kpt)
+        # print(kpt_all)
         
-        # rescoring
+        # {image_name: {person boxes: keypoints} }
+        keypoints = collections.defaultdict(list)
+        for kpt in kpt_all: keypoints[kpt['image']].append(kpt)
+        
+        # rescoring and getting oks nms
         oks_nms_keypoints = []
         for image in keypoints.keys():
             image_keypoints = keypoints[image]
+            
+            # rescoring
             for person in image_keypoints:
                 box_score = person['score']
                 kpt_score = 0.
                 valid_num = 0
 
                 # select all valid keypoint from each person instance,
-                for kpt_idx in range(0, self.num_joints):
+                for kpt_idx in range(self.num_joints):
                     kpt_instance_score = person['keypoints'][kpt_idx][2]    # 0, 1 location, 2 confidence
                     if kpt_instance_score > self.in_vis_thre:
                         kpt_score += kpt_instance_score
                         valid_num += 1
                     if valid_num > 0: kpt_score /= float(valid_num)
                 
-                # update person score with mean of theirs and own box score
+                # update person score with mean of theirs keypoints and own box score
                 person['score'] = kpt_score * box_score
 
-            '''
-            # to be done further
+            # calculate oks nms
             if self.soft_nms:
-                keep = soft_oks_nms(
-
-                )
+                # keep = soft_oks_nms([image_keypoints[i] for i in range(len(image_keypoints))], self.oks_thre)
+                keep = soft_oks_nms(image_keypoints, self.oks_thre)
             else:
-                keep = oks_nms(
-
-                )
+                # keep = oks_nms([image_keypoints[i] for i in range(len(image_keypoints))], self.oks_thre)
+                keep = oks_nms(image_keypoints, self.oks_thre)
             
             # keep all
             if len(keep) == 0:
                 oks_nms_keypoints.append(image_keypoints)
             # keep part we expected
             else:
-                oks_nms_keypoints.append([image_keypoints[_keep] for _keep in keep])
-            '''
+                oks_nms_keypoints.append([image_keypoints[i] for i in keep])
         
         self._write_coco_keypoint_results(oks_nms_keypoints, res_file)
 
         # training phase
         if 'test' not in self.image_set:
-            info_string = self._do_python_keypoint_eval(res_file, res_folder)
+            info_string = self._do_python_keypoint_eval(res_file)
             value = collections.OrderedDict(info_string)
             return value, value['AP']
+
         # validating or testing phase
         else:
             return {'NULL': 0}, 0

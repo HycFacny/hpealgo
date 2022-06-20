@@ -25,7 +25,8 @@ block_dict = {
     'BASIC': BasicBlock,
     'BOTTLENECK': Bottleneck
 }
-
+# cnt = 0
+# fuze_cnt = 0
 
 def _get_clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
@@ -37,6 +38,42 @@ def _get_activation_fn(activation):
     if activation == 'glu': return F.glu
 
     raise RuntimeError(f'activation should be relu/gelu, not {activation}')
+
+
+# def _make_fuse_layers(num_branches, num_in_channels, multi_scale_output):
+#     if num_branches == 1: return None
+
+#     fuse_layers = []
+#     # pre post layers k*k matric
+#     for post in range(num_branches if multi_scale_output else 1):
+#         layer = []
+#         for pre in range(num_branches):
+#             in_channel = num_in_channels[pre]
+#             out_channel = num_in_channels[post]
+#             if pre > post:
+#                 layer.append(nn.Sequential(
+#                     nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, padding=0, bias=False),
+#                     nn.BatchNorm2d(out_channel),
+#                     nn.Upsample(scale_factor=2 ** (pre - post), mode='nearest')
+#                 ))
+#             elif pre < post:
+#                 conv3x3s = []
+#                 for cur in range(post - pre):
+#                     out_channel_inter = out_channel \
+#                         if cur == post - pre - 1 else in_channel
+#                     conv3x3_ = nn.Sequential(
+#                         nn.Conv2d(in_channel, out_channel_inter, kernel_size=3, stride=2, padding=1, bias=False),
+#                         nn.BatchNorm2d(out_channel_inter, momentum=BN_MOMENTUM)
+#                     )
+#                     if cur < post - pre - 1:
+#                         conv3x3_.add_module('relu_{}'.format(cur), nn.ReLU(False))
+#                     conv3x3s.append(conv3x3_)
+#                 layer.append(nn.Sequential(*conv3x3s))
+#             else:
+#                 layer.append(None)
+#         fuse_layers.append(nn.ModuleList(layer))
+    
+#     return nn.ModuleList(fuse_layers)
 
 
 def _head(feature_maps, stage, method='highest'):
@@ -60,15 +97,14 @@ def _head(feature_maps, stage, method='highest'):
     return output
 
 
-
 class HighResolutionModule(nn.Module):
     """
     Args: 
         num_branches: number of branches paralleled in this module
         blocks: Bottleneck or BasicBlock, both are class type
-        num_blocks: [1, num_branches], store number of blocks in each branches
-        num_in_channels: [1, num_branches], store number of channels inputted in each branch
-        num_out_channels: [1, num_branches], store number of channels outputted of each branch
+        num_blocks: [num_branches], store number of blocks in each branches
+        num_in_channels: [num_branches], store number of channels input in each branch
+        num_out_channels: [num_branches], store number of channels output of each branch
         fuse_method: fusion method in Fuse Layer
         multi_scale_output: 
     """
@@ -76,8 +112,7 @@ class HighResolutionModule(nn.Module):
     def __init__(self, num_branches, block, num_blocks, num_in_channels,
                  num_out_channels, fuse_method, multi_scale_output=True):
         super(HighResolutionModule, self).__init__()
-
-        self._check_branches(block, num_branches, num_blocks, num_in_channels, num_out_channels)
+        self._check_branches(num_branches, num_blocks, num_in_channels, num_out_channels)
 
         self.num_in_channels = num_in_channels
         self.num_out_channels = num_out_channels
@@ -91,15 +126,16 @@ class HighResolutionModule(nn.Module):
         self.branches = self._make_branches()
         # fuse[post][pre](feature maps) == nn.ModuleList, get the feature maps
         self.fuse_layers = self._make_fuse_layers()
-        self.relu = nn.ReLU(True)
+        self.relu = nn.ReLU(inplace=True)
     
-    def _check_branches(self, block, num_branches, num_blocks, num_in_channels, num_out_channels):
+    def _check_branches(self, num_branches, num_blocks, num_in_channels, num_out_channels):
         if [num_branches, num_branches, num_branches] != \
             [len(num_blocks), len(num_out_channels), len(num_in_channels)]:
             ermsg = f'NUM_BRANCHES must be the same as size of NUM_BLOCKS and NUM_CHANNELS'
             logger.error(ermsg)
             raise ValueError(ermsg)
     
+    # all basicblocks
     def _make_branch(self, branch_index, stride=1):
         downsample = None
         if stride != 1 or self.num_in_channels[branch_index] != self.num_out_channels[branch_index] * self.block.expansion:
@@ -152,22 +188,28 @@ class HighResolutionModule(nn.Module):
                         nn.BatchNorm2d(out_channel),
                         nn.Upsample(scale_factor=2 ** (pre - post), mode='nearest')
                     ))
+                    # global cnt
+                    # cnt += 1
                 elif pre < post:
                     conv3x3s = []
                     for cur in range(post - pre):
-                        out_channel_inter = out_channel \
-                            if cur == post - pre - 1 else in_channel
+                        out_channel_inter = out_channel if cur == post - pre - 1 else in_channel
                         conv3x3_ = nn.Sequential(
                             nn.Conv2d(in_channel, out_channel_inter, kernel_size=3, stride=2, padding=1, bias=False),
                             nn.BatchNorm2d(out_channel_inter, momentum=BN_MOMENTUM)
                         )
                         if cur < post - pre - 1:
-                            conv3x3_.add_module('relu_{}'.format(cur), nn.ReLU(False))
+                            conv3x3_.add_module('(2): ', nn.ReLU(inplace=True))
                         conv3x3s.append(conv3x3_)
                     layer.append(nn.Sequential(*conv3x3s))
                 else:
                     layer.append(None)
             fuse_layers.append(nn.ModuleList(layer))
+        
+        # global fuze_cnt
+        # fuze_cnt += 1
+        # print_inter_debug_info('fuse_layer {}'.format(fuze_cnt), nn.ModuleList(fuse_layers), 'hrnet')
+        # print_inter_debug_info('num_branches of {}'.format(fuze_cnt), self.num_branches, 'hrnet')
         
         return nn.ModuleList(fuse_layers)
     
@@ -196,7 +238,8 @@ class HighResolutionModule(nn.Module):
 
 
 class HRNetBase(nn.Module):
-
+    global cnt
+    
     def __init__(self, cfg, **kwargs):
         super().__init__()
 
@@ -209,10 +252,10 @@ class HRNetBase(nn.Module):
 
         # stem net
         self.conv1 = nn.Conv2d(3, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False)
-        print_inter_debug_info('bn1_inchannels', self.in_channels, 'hrnet')
+        # print_inter_debug_info('bn1_inchannels', self.in_channels, 'hrnet')
         self.bn1 = nn.BatchNorm2d(self.in_channels, momentum=BN_MOMENTUM)
         self.conv2 = nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False)
-        print_inter_debug_info('bn2_inchannels', self.in_channels, 'hrnet')
+        # print_inter_debug_info('bn2_inchannels', self.in_channels, 'hrnet')
 
         self.bn2 = nn.BatchNorm2d(self.in_channels, momentum=BN_MOMENTUM)
         self.relu = nn.ReLU(inplace=True)
@@ -246,9 +289,12 @@ class HRNetBase(nn.Module):
     
         # adjust in_channels
         self.in_channels = copy.deepcopy(self.out_channels)
-        self.stage3 = self._make_stage(self.stage3_cfg)
+        self.stage3 = self._make_stage(self.stage3_cfg, multi_scale_output=False)
 
         self.pretrained_layers = extra['PRETRAINED_LAYERS']
+
+        # global cnt
+        # print(cnt)
 
     # first layer with no fuse layer
     def _make_layer(self, block, in_channels, num_blocks, stride=1):
@@ -326,6 +372,7 @@ class HRNetBase(nn.Module):
 
         modules = []
         for _ in range(num_modules):
+            # upon on the last layer, we dont use multi output
             if not multi_scale_output and _ == num_modules - 1:
                 reset_multi_scale_output = False
             else:
@@ -460,7 +507,7 @@ class HRNetBase_S4(nn.Module):
         self.transition3 = self._make_transition_layer()
 
         self.in_channels = copy.deepcopy(self.out_channels)
-        self.stage4 = self._make_stage(self.stage4_cfg)
+        self.stage4 = self._make_stage(self.stage4_cfg, multi_scale_output=False)
 
         self.pretrained_layers = extra['PRETRAINED_LAYERS']
 
@@ -634,3 +681,10 @@ class HRNetBase_S4(nn.Module):
         elif pretrained:
             logger.error('=> please download pre-trained models first!')
             raise ValueError(f'{pretrained} is not exist!')
+
+
+def get_pose_net(cfg, is_train, **kwargs):
+    model = HRNetBase(cfg, **kwargs)
+    if is_train and cfg.MODEL.INIT_WEIGHTS:
+        model.init_weights(cfg.MODEL.PRETRAINED, cfg)
+    return model

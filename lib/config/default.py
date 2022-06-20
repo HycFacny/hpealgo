@@ -146,7 +146,7 @@ def update_config(cfg, args):
             str(Path(cfg.DATA_DIR, cfg.TEST.MODEL_FILE))
     
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(x) for x in cfg.GPUS)
-    cfg.GPUS = [x - cfg.GPUS[0] for x in cfg.GPUS]
+    cfg.GPUS = [x for x in range(len(cfg.GPUS))]
 
     cfg.freeze()
 

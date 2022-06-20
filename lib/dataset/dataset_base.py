@@ -184,7 +184,7 @@ class JointsDataset(Dataset):
             'rotation': rotation,
             'score': score
         }
-        print('**********************************************')
+        # print('**********************************************')
 
         print_func('input', input)
         print_func('input_size', input.size())
@@ -249,7 +249,7 @@ class JointsDataset(Dataset):
 
 
     def half_body_transform(self, joints, joints_vis):
-        print(joints)
+        # print(joints)
         upper_joints, lower_joints = [], []
         
         # part joints into lower and upper set

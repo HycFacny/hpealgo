@@ -1,0 +1,432 @@
+........................loss_item: >>>>
+0.08569730073213577
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.08050961047410965
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.030030205845832825
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.01456100307404995
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.012785891070961952
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.015224765054881573
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.013583837077021599
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.013748269528150558
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.009105971083045006
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.007203646469861269
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.006364577449858189
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.005741484463214874
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.005273849703371525
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.004951625131070614
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.005377084016799927
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.004159849602729082
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.004316162317991257
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0034930959809571505
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0033177300356328487
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.003048789221793413
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0028875835705548525
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0026025555562227964
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0026129165198653936
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0023700438905507326
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.002339690225198865
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.002051371382549405
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001993413083255291
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0019573697354644537
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0016616318607702851
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0016827365616336465
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0018391564954072237
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0015753291081637144
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0016973938327282667
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0015431917272508144
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0013869915856048465
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0014160949504002929
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001379300025291741
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0013832430122420192
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0012962307082489133
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0013305040774866939
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0013396738795563579
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0012322800466790795
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0012553358683362603
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011349293636158109
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011717436136677861
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011430967133492231
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011339904740452766
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011622038437053561
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011817601043730974
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010863551869988441
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011148921912536025
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010970255825668573
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011327741667628288
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010789298685267568
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.00101881951559335
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010821595788002014
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010455544106662273
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011266159126535058
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010610617464408278
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011470160679891706
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.00101771904155612
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001017691334709525
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011678036535158753
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011466335272416472
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011139747221022844
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011092183412984014
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010641694534569979
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010008563986048102
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011347192339599133
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010296270484104753
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010059017222374678
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011470654280856252
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001000653370283544
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010239724069833755
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010116295889019966
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010961763327941298
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010471269488334656
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011148810153827071
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010774702532216907
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010565671836957335
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010619537206366658
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010934312595054507
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0009895764524117112
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010701732244342566
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010143930558115244
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010691591305658221
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010212308261543512
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011514602228999138
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.000992493936792016
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010903269285336137
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0009863331215456128
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011306856758892536
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010365574853494763
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010261713759973645
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0008763575460761786
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011379403294995427
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.00103278667666018
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011038226075470448
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0011184259783476591
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001008593593724072
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010887355310842395
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010320160072296858
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.001042262651026249
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0009730380261316895
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010607539443299174
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010509280255064368
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0010525394463911653
+input_size_per_sample: >>>>
+64
+loss_item: >>>>
+0.0009203204535879195
+input_size_per_sample: >>>>
+64

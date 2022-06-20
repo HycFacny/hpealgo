@@ -6,6 +6,8 @@ from ntpath import join
 import torch
 from torch import nn
 
+from utils.print_functions import print_inter_debug_info
+
 
 class JointsMSELoss(nn.Module):
     """ MSE loss """
@@ -15,10 +17,11 @@ class JointsMSELoss(nn.Module):
         self.use_target_weight = use_target_weight
     
     def forward(self, output, target, target_weight):
+        print_inter_debug_info('Loss Output Size', output.size(), 'loss')
         """
-            output: torch.Tensor([batch_size, num_joints, H_hmpsz, W_hmpsz])
-            target: torch.Tensor([batch_size, num_joints, H_hmpsz, W_hmpsz])
-            target_weight: torch.Tensor([batch_size, num_joints, 1])
+            output: torch.Tensor(batch_size, num_joints, H_hmpsz, W_hmpsz)
+            target: torch.Tensor(batch_size, num_joints, H_hmpsz, W_hmpsz)
+            target_weight: torch.Tensor(batch_size, num_joints, 1)
         """
         batch_size = output.size(0)
         num_joints = output.size(1)
@@ -30,15 +33,15 @@ class JointsMSELoss(nn.Module):
         loss = 0.
         for joint_index in range(num_joints):
             # [batch_size, H * W]
-            heatmap_pred = heatmap_pred[joint_index].squeeze()
-            heatmap_gt = heatmap_gt[joint_index].squeeze()
+            _heatmap_pred = heatmap_pred[joint_index].squeeze()
+            _heatmap_gt = heatmap_gt[joint_index].squeeze()
             if self.use_target_weight:
                 loss += .5 * self.criterion(
-                    heatmap_pred.mul(target_weight[:, joint_index]),
-                    heatmap_gt.mul(target_weight[:, joint_index])
+                    _heatmap_pred.mul(target_weight[:, joint_index]),
+                    _heatmap_gt.mul(target_weight[:, joint_index])
                 )
             else:
-                loss += .5 * self.criterion(heatmap_pred, heatmap_gt)
+                loss += .5 * self.criterion(_heatmap_pred, _heatmap_gt)
         
         return loss / num_joints
 

@@ -6,7 +6,6 @@ import argparse
 import pprint
 import shutil
 from pathlib import Path
-import os
 
 import torch
 import torch.nn.parallel
@@ -70,7 +69,7 @@ def main():
     # random generate an input to calc network params ( one batch )
     dump_input = torch.rand((1, 3, cfg.MODEL.IMAGE_SIZE[1], cfg.MODEL.IMAGE_SIZE[0]))
     logger.info(get_model_summary(model, dump_input))
-'''
+    
     # model
     model = torch.nn.DataParallel(model, device_ids=cfg.GPUS).cuda()
     criterion = JointsMSELoss(use_target_weight=cfg.LOSS.USE_TARGET_WEIGHT).cuda()
@@ -82,7 +81,7 @@ def main():
     train_dataset = eval('dataset.' + cfg.DATASET.DATASET)(
         cfg, cfg.DATASET.ROOT, cfg.DATASET.TRAIN_SET, True,
         transforms.Compose([
-            transforms.ToTensors(),
+            transforms.ToTensor(),
             normalize
         ])
     )
@@ -90,7 +89,7 @@ def main():
     valid_dataset = eval('dataset.' + cfg.DATASET.DATASET)(
         cfg, cfg.DATASET.ROOT, cfg.DATASET.TEST_SET, False,
         transforms.Compose([
-            transforms.ToTensors(),
+            transforms.ToTensor(),
             normalize
         ])
     )
@@ -110,6 +109,7 @@ def main():
         num_workers=cfg.WORKERS,
         pin_memory=cfg.PIN_MEMORY
     )
+
 
     best_perf = 0.
     best_model = False
@@ -161,6 +161,8 @@ def main():
             'perf': perf_indicator,
             'optimizer': optimizer.state_dict(),
         }, best_model, final_output_dir)
+        
+        # break
 
     final_model_state_file = Path(final_output_dir) / 'final_state.pth'
     logger.info(f'=> saving final model state to {final_model_state_file}')
@@ -168,7 +170,6 @@ def main():
     torch.save(model.module.state_dict(), final_model_state_file)
     writer_dict['writer'].close()
 
-'''
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')

@@ -75,7 +75,7 @@ class Attention(nn.Module):
             mask = mask[:, None, :] * mask[:, :, None]
             dots.masked_fill_( ~mask, mask_value )
             del mask
-        
+
         attention = dots.softmax(dim=-1)
         out = torch.einsum('bhij,bhjd->bhid', attention, v)
         out = rearrange(out, 'b h n d -> b n (h d)')

@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jun  1 23:21:26 2022
+# Make data base, printed on Sun Jun 19 21:52:57 2022
 
 # Variables
 
@@ -35,7 +35,7 @@ SHELL = /bin/sh
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
 # environment
-_ = /data4/huangyuchao/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/node
+_ = /data4/huangyuchao/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/node
 # makefile (from 'Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # 'override' directive
@@ -49,9 +49,9 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /data4/huangyuchao
 # environment
-SSH_CONNECTION = 10.29.0.39 46916 10.29.0.238 22
+SSH_CONNECTION = 10.130.5.139 49401 10.29.0.238 22
 # environment
-PATH = /data4/huangyuchao/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/home/huangyuchao/bin:/home/huangyuchao/.local/bin:/home/huangyuchao/anaconda3/bin:/home/huangyuchao/anaconda3/condabin:/home/huangyuchao/anaconda3/bin:/home/huangyuchao/cuda10.1/bin:/usr/local/cuda-11.1/bin:/home/huangyuchao/bin:/home/huangyuchao/.local/bin:/usr/local/cuda-11.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /data4/huangyuchao/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/bin/remote-cli:/home/huangyuchao/bin:/home/huangyuchao/.local/bin:/home/huangyuchao/anaconda3/bin:/home/huangyuchao/anaconda3/condabin:/home/huangyuchao/anaconda3/bin:/home/huangyuchao/cuda10.1/bin:/usr/local/cuda-11.1/bin:/home/huangyuchao/bin:/home/huangyuchao/.local/bin:/usr/local/cuda-11.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/1001
 # environment
@@ -73,7 +73,7 @@ PWD = /data4/huangyuchao/projects/projects/hpealgo
 # environment
 QT_QPA_PLATFORMTHEME = appmenu-qt5
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1001/vscode-ipc-25c3b374-fb25-4fca-9ec7-162d088939c0.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1001/vscode-ipc-ba932db3-aa7d-4645-825a-d4fc355cc685.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -84,6 +84,8 @@ HOME = /home/huangyuchao
 LD_LIBRARY_PATH = /home/huangyuchao/cuda10.1/lib64:/usr/local/cuda-11.1/lib64/usr/local/cuda-11.1/lib64
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
+# environment
+NCCL_P2P_DISABLE = 1
 # environment
 LOGNAME = huangyuchao
 # environment
@@ -107,7 +109,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 49438
+XDG_SESSION_ID = 51545
 # environment
 USER = huangyuchao
 # makefile
@@ -127,13 +129,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 10.29.0.39 46916 22
+SSH_CLIENT = 10.130.5.139 49401 22
 # environment
 MAIL = /var/mail/huangyuchao
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /data4/huangyuchao/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/helpers/browser.sh
+BROWSER = /data4/huangyuchao/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/bin/helpers/browser.sh
 # environment
 VSCODE_HANDLES_SIGPIPE = true
 # default
@@ -163,7 +165,7 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
-# Load=76/1024=7%, Rehash=0, Collisions=8/104=8%
+# Load=77/1024=8%, Rehash=0, Collisions=8/105=8%
 
 # Pattern-specific Variable Values
 
@@ -171,9 +173,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 2113, inode 199625404): 14 files, no impossibilities.
+# . (device 2113, inode 199625404): 18 files, no impossibilities.
 
-# 14 files, no impossibilities in 1 directories.
+# 18 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -243,12 +245,12 @@ clean:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 20 / storage = 164 B / avg = 8 B
-# current buf: size = 8162 B / used = 164 B / count = 20 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 24 / storage = 204 B / avg = 8 B
+# current buf: size = 8162 B / used = 204 B / count = 24 / avg = 8 B
 
-# strcache performance: lookups = 28 / hit rate = 28%
+# strcache performance: lookups = 32 / hit rate = 25%
 # hash-table stats:
-# Load=20/8192=0%, Rehash=0, Collisions=1/28=4%
-# Finished Make data base on Wed Jun  1 23:21:26 2022
+# Load=24/8192=0%, Rehash=0, Collisions=1/32=3%
+# Finished Make data base on Sun Jun 19 21:52:57 2022
 
  

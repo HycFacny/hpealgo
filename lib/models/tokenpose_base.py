@@ -67,9 +67,9 @@ class TokenPoseBase(nn.Module):
         self.keypoint_token = nn.Parameter(torch.zeros(1, self.num_keypoints, dim))
         self.to_keypoint_token = nn.Identity()
 
-        # keypoint token init
         trunc_normal_(self.keypoint_token, std=.02)
         if apply_init: self.apply(self._init_weights)
+
 
     def forward():
         raise NotImplementedError
@@ -181,8 +181,10 @@ class TokenPose_L_Base(TokenPoseBase):
             MLPHead(hidden_heatmap_dim, heatmap_dim)
         ) if dim * 3 <= hidden_heatmap_dim * 0.5 and apply_multi else MLPHead(dim * 3, heatmap_dim)
 
+        # 
+
     def forward(self, features, mask=None):
-        print(features.shape)
+        # print(features.shape)
         p_h, p_w = self.patch_size[1], self.patch_size[0]
 
         # backbone feature: [b, c, h, w] ( b: batch_size, c: channels, h: featuremap_h, w: featuremap_w)

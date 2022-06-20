@@ -48,3 +48,9 @@ def print_inter_name_value(name_value, full_arch_name):
         ' '.join(['| {:.3f}'.format(value) for value in values]) +
          ' |'
     )
+
+
+def print_value_and_type(x, if_print=True):
+    if if_print:
+        print(x, type(x))
+    return str(x) + '\n' + str(type(x))

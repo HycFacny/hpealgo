@@ -15,7 +15,7 @@ from core.evaluate import get_max_pred_locations
 
 def save_debug_images(cfg, input, meta, target, joints_pred, heatmap_pred, prefix):
     """
-    save intermediate images in validating phase
+    Save intermediate images in validating phase
 
     Args:
         input: [batch_size, channels, height, width]
@@ -54,7 +54,7 @@ def save_batch_image_with_joints(batch_images, batch_joints, batch_joints_vis,
     
     Args:
         batch_image: [batch_size, channel, height, width]
-        batch_joints: [batch_size, num_joints, 3] ( w, h, 0 )
+        batch_joints: [batch_size, num_joints, 3] ( w, h, score )
         batch_joints_vis: [batch_size, num_joints, 1]
         nrow, padding are factors for forming outputs
     """
@@ -65,7 +65,7 @@ def save_batch_image_with_joints(batch_images, batch_joints, batch_joints_vis,
     height_each = int(batch_images.size(2) + padding)
     width_each = int(batch_images.size(3) + padding)
 
-    image_ndarray = grid.mul(255).clamp(0, 255).permute(1, 2, 0).cpu()
+    image_ndarray = grid.detach().mul(255).clamp(0, 255).permute(1, 2, 0).cpu()
     image_ndarray = image_ndarray.numpy().copy().astype(np.uint8)
     
     image_cnt = 0
@@ -80,6 +80,7 @@ def save_batch_image_with_joints(batch_images, batch_joints, batch_joints_vis,
                 if joint_vis[0] > 0:
                     cv2.circle(image_ndarray, (joint[0], joint[1]), 2, [255, 0, 0], 2)
             image_cnt += 1
+    
     cv2.imwrite(image_name, image_ndarray)
 
 
@@ -101,7 +102,7 @@ def save_batch_heatmaps(batch_images, batch_heatmaps, image_name, normalize=True
         _min = float(batch_images.min())
         _max = float(batch_images.max())
         batch_images = batch_images.clone()
-        batch_images.add_(-_min).div_(max - min + eps)
+        batch_images.add_(-_min).div_(_max - _min + eps)
     
     grid = np.zeros((
         batch_size * hmp_height, 
@@ -114,7 +115,7 @@ def save_batch_heatmaps(batch_images, batch_heatmaps, image_name, normalize=True
     for idx in range(batch_size):
         image = batch_images[idx].mul(255).clamp(0, 255).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
         image = cv2.resize(image, (int(hmp_width), int(hmp_height)) )
-        heatmaps = batch_heatmaps[idx].mul(255).clamp(0, 255).cpu().numpy().astype(np.uint8)
+        heatmaps = batch_heatmaps[idx].detach().mul(255).clamp(0, 255). cpu().numpy().astype(np.uint8)
         
         height_begin = hmp_height * idx
         height_end = hmp_height * (idx + 1)

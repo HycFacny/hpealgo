@@ -52,9 +52,16 @@ def train(cfg, train_loader, model, criterion, optimizer, epoch, output_dir, ten
     for i, (input, target, target_weight, meta) in enumerate(train_loader):
         # data loading time
         data_time.update(time.time() - begin)
+        # print(data_time.val)
+        # print_inter_debug_info('batch_input_size', input.shape, 'input')
+        # print_inter_debug_info('batch_target_size', target.shape, 'input')
 
         # compute output
+        # torch.autograd.set_detect_anomaly(True)
+        print(input.size(), input.device)
         outputs = model(input)
+        # print(time.time() - begin - data_time.val)
+        # print(1)
 
         target = target.cuda(non_blocking=True)
         target_weight = target_weight.cuda(non_blocking=True)
@@ -68,22 +75,27 @@ def train(cfg, train_loader, model, criterion, optimizer, epoch, output_dir, ten
         
         # compute gradient and update
         optimizer.zero_grad()
+        # with torch.autograd.detect_anomaly():
         loss.backward()
         optimizer.step()
 
+        # print(2)
+
         # measure accuracy and record loss
-        _, avg_accuracy, cnt, pred = get_accuracy(output.detach().cpu().numpy(), target.detach().cpu().numpy())
-        losses.update(loss.item, input.size(0))
+        _, avg_accuracy, cnt, pred = get_accuracy(outputs.detach().cpu().numpy(), target.detach().cpu().numpy())
+        print_inter_debug_info('loss_item', loss.item(), 'training_phase')
+        print_inter_debug_info('input_size_per_sample', input.size(0), 'training_phase')
+        losses.update(loss.item(), input.size(0))
         accuracy.update(avg_accuracy, cnt)
         batch_time.update(time.time() - begin)
         
         if i % cfg.PRINT_FREQ == 0:
-            messagebox = 'Epoch: [{0}][{1}/{2}] \t' \
-                         'Time {batch_time.val: .3f}s ({batch_time.avg: .3f}s \t' \
-                         'Speed {speed: .1f} samples/s \t' \
-                         'Data {data_time.val: .3f}s ({data_time.avg: .3f}s \t' \
-                         'Loss {loss.val: .3f} ({loss.avg: .3f}) \t' \
-                         'Accuracy {accuracy.val: .3f} ({accuracy.avg: .3f})'.format(
+            messagebox = 'Epoch: [{0}][{1}/{2}]\t' \
+                         'Time {batch_time.val:.3f}s ({batch_time.avg:.3f}s)\t' \
+                         'Speed {speed:.1f} samples/s\t' \
+                         'Data {data_time.val:.3f}s ({data_time.avg:.3f}s)\t' \
+                         'Loss {loss.val:.5f} ({loss.avg:.5f})\t' \
+                         'Accuracy {accuracy.val:.3f} ({accuracy.avg:.3f})'.format(
                              epoch, i, len(train_loader), batch_time=batch_time,
                              speed=input.size(0) / batch_time.val,
                              data_time=data_time,
@@ -99,7 +111,7 @@ def train(cfg, train_loader, model, criterion, optimizer, epoch, output_dir, ten
             writer_dict['train_global_steps'] = global_steps + 1
             
             prefix = '{}_{}'.format(str(Path(output_dir, 'train')), i)
-            save_debug_images(cfg, input, meta, target, pred * 4, output, prefix)
+            save_debug_images(cfg, input, meta, target, pred * 4, outputs, prefix)
 
         begin = time.time()
 
@@ -143,46 +155,54 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
                 output_flip = torch.from_numpy(output_flip).cuda()
 
                 output = (output + output_flip) * .5
+            # if i == 4: break
         
-        target = target.cuda(non_blocking=True)
-        target_weight = target_weight.cuda(non_blocking=True)
-        loss = criterion(output, target, target_weight)
+            target = target.cuda(non_blocking=True)
+            target_weight = target_weight.cuda(non_blocking=True)
+            loss = criterion(output, target, target_weight)
 
-        num_images = input.size(0)
+            num_images = input.size(0)
 
-        _, avg_accuracy, cnt, pred = get_accuracy(output.cpu().numpy(), target.cpu().numpy())
-        losses.update(loss.item(), num_images)
-        accuracy.update(avg_accuracy, cnt)
-        batch_time.update(time.time() - begin)
-        
-        center = meta['center'].numpy()
-        scale = meta['scale'].numpy()
-        score = meta['score'].numpy()
+            _, avg_accuracy, cnt, pred = get_accuracy(output.cpu().numpy(), target.cpu().numpy())
+            losses.update(loss.item(), num_images)
+            accuracy.update(avg_accuracy, cnt)
+            batch_time.update(time.time() - begin)
+            
+            center = meta['center'].numpy()
+            scale = meta['scale'].numpy()
+            score = meta['score'].numpy()
 
-        preds, maxvals = get_final_preds(cfg, output.clone().cpu().numpy(), center, scale)
+            # preds: ndarray(batch_size, num_joints, 2) -> H, W
+            # maxvals: ndarray(batch_size, num_joints, 1) -> value of max preds
+            # get final preds after tylor correction
+            preds, maxvals = get_final_preds(cfg, output.clone().cpu().numpy(), center, scale)
+            # print(type(preds), preds.shape)
+            # print(type(preds), maxvals.shape)
 
-        all_preds[idx : idx + num_images, :, 0 : 2] = preds[:, :, 0 : 2]
-        all_preds[idx : idx + num_images, :, 2 : 3] = maxvals[:, :, 0]
-        # double check this all_boxes parts
-        all_boxes[idx : idx + num_images, 0 : 2] = center[:, 0 : 2]
-        all_boxes[idx : idx + num_images, 2 : 4] = scale[:, 0 : 2]
-        all_boxes[idx : idx + num_images, 4] = np.prod(scale * 200, 1)
-        all_boxes[idx : idx + num_images, 5] = score
-        image_path.extend(meta['image'])
+            all_preds[idx : idx + num_images, :, 0 : 2] = preds[:, :, 0 : 2]
+            all_preds[idx : idx + num_images, :, 2 : 3] = maxvals
+            # double check this all_boxes parts
+            all_boxes[idx : idx + num_images, 0 : 2] = center[:, 0 : 2]
+            all_boxes[idx : idx + num_images, 2 : 4] = scale[:, 0 : 2]
+            all_boxes[idx : idx + num_images, 4] = np.prod(scale * 200, 1)
+            all_boxes[idx : idx + num_images, 5] = score
+            image_path.extend(meta['image'])
 
-        idx += num_images
+            idx += num_images
 
-        if i % cfg.PRINT_FREQ == 0:
-            msg = 'Test: [{0}/{1}] \t' \
-                    'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) \t' \
-                    'Loss {loss.val:.4f} ({loss.avg:.4f}) \t' \
-                    'Accuracy {accuracy.val:.3f} ({accuracy.avg:.3f})'.format(
-                        i, len(val_loader), batch_time=batch_time,
-                        loss=losses, accuracy=accuracy)
-            logger.info(msg)
+            if i % cfg.PRINT_FREQ == 0:
+                msg = 'Test: [{0}/{1}] \t' \
+                        'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) \t' \
+                        'Loss {loss.val:.4f} ({loss.avg:.4f}) \t' \
+                        'Accuracy {accuracy.val:.3f} ({accuracy.avg:.3f})'.format(
+                            i, len(val_loader), batch_time=batch_time,
+                            loss=losses, accuracy=accuracy)
+                logger.info(msg)
 
-            prefix = '{}_{}'.format(str(Path(output_dir) / 'val'), i)
-            save_debug_images(cfg, input, meta, target, pred * 4, output, prefix)
+                prefix = '{}_{}'.format(str(Path(output_dir) / 'val'), i)
+                save_debug_images(cfg, input, meta, target, pred * 4, output, prefix)
+    
+        # print(image_path)
     
         name_values, pref_indicator = val_dataset.evaluate(
             cfg, all_preds, output_dir, all_boxes, image_path, filenames, imgnums
@@ -206,8 +226,6 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
             else:
                 writer.add_scalars('valid', dict(name_values), global_steps)
             writer_dict['valid_global_steps'] = global_steps + 1
-
-        begin = time.time()
 
     return pref_indicator
 

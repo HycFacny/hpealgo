@@ -126,7 +126,3 @@ STAGE3:
   NUM_BRANCHES: 3
   NUM_CHANNELS: [48, 96, 192]
   NUM_MODULES: 4
-bn1_inchannels: >>>>
-64
-bn2_inchannels: >>>>
-64

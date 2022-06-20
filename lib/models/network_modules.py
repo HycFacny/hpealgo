@@ -30,8 +30,10 @@ class BasicBlock(nn.Module):
         self.conv1 = conv3x3(in_channels, out_channels, stride)
         self.bn1 = nn.BatchNorm2d(out_channels, momentum=BN_MOMENTUM)
         self.relu = nn.ReLU(inplace=True)
+        
         self.conv2 = conv3x3(out_channels, out_channels)
         self.bn2 = nn.BatchNorm2d(out_channels, momentum=BN_MOMENTUM)
+        
         self.downsample = downsample
         self.stride = stride
     
@@ -39,10 +41,12 @@ class BasicBlock(nn.Module):
         residual = x
 
         out = self.conv1(x)
-        out = self.bn1(x)
-        out = self.relu(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        
         out = self.conv2(out)
         out = self.bn2(out)
+        
         if self.downsample is not None:
             residual = self.downsample(x)
         
@@ -54,7 +58,6 @@ class BasicBlock(nn.Module):
 
 class Bottleneck(nn.Module):
     """ --> C --> Bottleneck(C, C) --> C * 4 --> """
-
     expansion = 4
 
     def __init__(self, in_channels, out_channels, stride=1, downsample=None):

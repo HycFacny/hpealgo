@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from audioop import avg
 
 import numpy as np
 
@@ -14,7 +15,7 @@ def get_accuracy(heatmaps_pred, heatmaps_target, type='gaussian', thresh=0.5):
     Calculate arruracy PCK@thres factors using gt_heatmaps rather than x, y locations
     
     Args:
-        heatmaps_pred ( ndarray([batch_size, num_joints, hmp_height, hmp_width]) ): Predicted heatmaps
+        heatmaps_pred ( ndarray(batch_size, num_joints, hmp_height, hmp_width) ): Predicted heatmaps
         heatmaps_target ( same as before ): Ground truth heatmaps
         type (str, optional): Blur type. Defaults to 'gaussian'.
         thresh (float, optional): . Defaults to 0.5.
@@ -27,13 +28,14 @@ def get_accuracy(heatmaps_pred, heatmaps_target, type='gaussian', thresh=0.5):
     norm = 1.
 
     if type == 'gaussian':
+        # calculate location of max confidience of pred and gt
         # [batch_size, num_joints, 2], ...[:, :, 0] -> width, ...[:, :, 1] -> height
         heatmaps_pred, _ = get_max_pred_locations(heatmaps_pred)
         heatmaps_target, _ = get_max_pred_locations(heatmaps_target)
-        norm = np.ones( (heatmaps_pred.shape[0], 2) ) * np.array([height, width]) / 10
+        norm = np.ones( (heatmaps_pred.shape[0], 2) ) * np.array([height, width]) / 10 # [[6.4, 4.8]]
     
     dists = get_heatmap_dist(heatmaps_pred, heatmaps_target, norm)
-    
+    # print(dists)
     accuracy = np.zeros(num_joints + 1)
     avg_acc = 0.
     cnt = 0
@@ -41,10 +43,10 @@ def get_accuracy(heatmaps_pred, heatmaps_target, type='gaussian', thresh=0.5):
     for idx in range(num_joints):
         accuracy[idx + 1] = get_dist_accuracy(dists[idx])
         if accuracy[idx + 1] >= 0.:
-            avg_acc += avg_acc + accuracy[idx + 1]
+            avg_acc += accuracy[idx + 1]
             cnt += 1
 
-    avg_acc /= cnt if cnt > 0 else 0
+    avg_acc = avg_acc / cnt if cnt > 0 else 0
     if cnt > 0: accuracy[0] = avg_acc
     return accuracy, avg_acc, cnt, heatmaps_pred
 
@@ -135,13 +137,13 @@ def get_heatmap_dist(pred, gt, norm):
         dists (ndarray([num_joints, batch_size])): L2 norm between preds and gts
     """
     '''  '''
-    batch_size = pred.shape[0]
-    num_joints = pred.shape[1]
-    dists = np.zeros(num_joints, batch_size)
+    batch_size = int(pred.shape[0])
+    num_joints = int(pred.shape[1])
+    dists = np.zeros((num_joints, batch_size), dtype=np.float32)
     
-    for batch_idx in batch_size:
+    for batch_idx in range(batch_size):
         for joint_idx in range(num_joints):
-            if gt[batch_size, joint_idx, 0] > 1 and gt[batch_size, joint_idx, 1] > 1:
+            if gt[batch_idx, joint_idx, 0] > 1 and gt[batch_idx, joint_idx, 1] > 1:
                 normed_preds = pred[batch_idx, joint_idx, :] / norm[batch_idx]
                 normed_gt = gt[batch_idx, joint_idx, :] / norm[batch_idx]
                 dists[joint_idx, batch_idx] = np.linalg.norm(normed_preds - normed_gt)

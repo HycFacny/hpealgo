@@ -30,20 +30,19 @@ def add_lib_paths():
     # print(project_root)
 
     lib_root = project_root / 'lib'
-    lib_fold = get_folds_recursive(lib_root)
-
     tools_root = project_root / 'tools'
-    tools_fold = get_folds_recursive(tools_root)
-
     unittest_root = project_root / 'unit_test'
-    unittest_fold = get_folds_recursive(unittest_root)
-
     paths = [str(lib_root), str(tools_root), str(unittest_root)]
+
+
+    # lib_fold = get_folds_recursive(lib_root)
+    # tools_fold = get_folds_recursive(tools_root)
+    # unittest_fold = get_folds_recursive(unittest_root)
     # paths.extend(lib_fold)
     # paths.extend(tools_fold)
     # paths.extend(unittest_fold)
 
     for path in paths: add_path(path)
-    print(sys.path)
+    # print(sys.path)
 
 add_lib_paths()

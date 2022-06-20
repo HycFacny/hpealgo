@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import logging
+import time
 
 from torch import nn
 
@@ -38,8 +39,13 @@ class TokenPose_L(nn.Module):
         )
     
     def forward(self, x):
+        # print_inter_debug_info('whole_forward', '123', 'entire_network')
+        # print('new mission!!\n')
+        # begin = time.time()
         x = self.pre_feature(x)
+        # print('hrnet forward time {}'.format(time.time() - begin))
         x = self.transformer(x)
+        # print('whole network time {}'.format(time.time() - begin))
         return x
     
     def init_weights(self, pretrained='', cfg=None):
