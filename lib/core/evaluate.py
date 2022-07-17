@@ -56,11 +56,11 @@ def get_final_preds(cfg, batch_heatmaps, center, scale):
     Calculate the final preds processed through blur, tylor and transform
 
     Args:
-        batch_heatmaps (_type_): _description_
-        center (_type_): _description_
-        scale (_type_): _description_
+        batch_heatmaps ( ndarray(batch_size, joints, hmp_h, hmp_w) ): Batch heatmap preds
+        center ( ndarray(batch_size, 1) ): Batch center
+        scale ( ndarray(batch_size, 1) ): Batch scale
     """
-    locations, maxvals = get_max_pred_locations(batch_heatmaps=batch_heatmaps)
+    locations, maxvals = get_max_pred_locations(batch_heatmaps)
     height, width = batch_heatmaps.shape[2], batch_heatmaps.shape[3]
     preds = locations.copy()
     
@@ -76,9 +76,11 @@ def get_final_preds(cfg, batch_heatmaps, center, scale):
                 locations[batch_idx, joint_idx] = \
                     tylor(heatmaps[batch_idx, joint_idx], locations[batch_idx, joint_idx])
     
+    preds = locations.copy()
+    
     for _ in range(preds.shape[0]):
         preds[_] = get_transform_preds(
-            locations[_], center[_], scale[_], [height, width]
+            locations[_], center[_], scale[_], [width, height]
         )
     
     return preds, maxvals
@@ -92,7 +94,7 @@ def get_max_pred_locations(batch_heatmaps):
         batch_heatmaps (ndarray([batch_size, num_joints, height, width])): Batch heatmaps
 
     Returns:
-        preds (ndarray([batch_size, num_joints, 2])): Locations of heatmap maxvals
+        preds (ndarray([batch_size, num_joints, 2])): Locations of heatmap maxvals ( w, h )
         maxvals (ndarray([batch_size, num_joints, 1])): Maxvals of heatmap
     """
     assert isinstance(batch_heatmaps, np.ndarray), 'batch_heatmaps should be numpy.ndarray'
@@ -113,8 +115,9 @@ def get_max_pred_locations(batch_heatmaps):
 
     # preds: [5, 17, 2], preds[:, :, 0] -> height, preds[:, :, 1] -> width
     preds = np.tile(idx, (1, 1, 2)).astype(np.float32)
-    preds[:, :, 1] = preds[:, :, 1] % width
-    preds[:, :, 0] = np.floor((preds[:, :, 0]) / width)
+    
+    preds[:, :, 0] = preds[:, :, 0] % width
+    preds[:, :, 1] = np.floor((preds[:, :, 1]) / width)
 
     # pred_mask, with all preds > 0.
     pred_mask = np.tile(np.greater(maxvals, 0.), (1, 1, 2))
@@ -188,7 +191,7 @@ def get_transform_preds(locations, center, scale, output_size):
 def tylor(heatmap, locations):
     ''' alculate neighborbood derivation of locations to ajust them to relative confident values '''
     height, width = heatmap.shape[0], heatmap.shape[1]
-    point_x, point_y = int(locations[0] + .5), int(locations[1] + .5)
+    point_x, point_y = int(locations[1]), int(locations[0])
     
     if 1 < point_x < height - 2 and 1 < point_y < width - 2:
         dx  = (heatmap[point_x, point_y + 1] - heatmap[point_x, point_y - 1]) / 2.

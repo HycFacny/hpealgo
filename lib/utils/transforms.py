@@ -18,7 +18,7 @@ def get_affine_transmat(
         center (list[2]): Center of current image
         scale (list[2]): Scale of current image ( pixel_std == 200.)
         rotation (int): Degree of rotation
-        output_size (list[2]): [height, width] / [width, height]
+        output_size (list[2]): [width, height]
         shift (int or list, optional): Image shift factor. Defaults to np.array([0, 0], dtype=np.float32).
         inv (int, optional): If is inv operation. Defaults to 0.
 

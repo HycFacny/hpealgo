@@ -22,7 +22,7 @@ from core.loss import JointsMSELoss
 from core.function import validate
 from utils.logger import create_logger
 
-import dateset
+import dataset
 import models
 
 
@@ -57,7 +57,7 @@ def main():
     # for normal test
     # model.load_state_dict(torch.load(os.path.join('../output/coco/pose_resnet/res50_256x192_d256x3_adam_lr1e-3','model_best.pth')), strict=False)
     else:
-        model_state_file = str(Path(final_output_dir) / 'model_best.pth')
+        model_state_file = str(Path(final_output_dir) / 'model_best_perf.pth')
         logger.info(f'=> loading model from {model_state_file}')
         model.load_state_dict(torch.load(model_state_file))
     

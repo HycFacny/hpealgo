@@ -31,7 +31,6 @@ block_dict = {
 def _get_clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
 
-
 def _get_activation_fn(activation):
     if activation == 'relu': return F.relu
     if activation == 'gelu': return F.gelu
@@ -293,9 +292,6 @@ class HRNetBase(nn.Module):
 
         self.pretrained_layers = extra['PRETRAINED_LAYERS']
 
-        # global cnt
-        # print(cnt)
-
     # first layer with no fuse layer
     def _make_layer(self, block, in_channels, num_blocks, stride=1):
         downsample = None
@@ -427,14 +423,26 @@ class HRNetBase(nn.Module):
     
     def init_weights(self, pretrained='', print_load_info=False):
         logger.info('=> init HRnet weights forming as normal distribution')
-        for module in self.modules():
-            if isinstance(module, nn.Conv2d):
-                trunc_normal_(module.weight, std=.02)
-            if isinstance(module, nn.BatchNorm2d):
-                trunc_normal_(module.weight, std=1.)
-                nn.init.constant_(module.bias, 0)
-            if isinstance(module, nn.ConvTranspose2d):
-                trunc_normal_(module.weight, std=.02)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                # nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.normal_(m.weight, std=0.001)
+                for name, _ in m.named_parameters():
+                    if name in ['bias']:
+                        nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.ConvTranspose2d):
+                nn.init.normal_(m.weight, std=0.001)
+                for name, _ in m.named_parameters():
+                    if name in ['bias']:
+                        nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, std=0.001)
+                for name, _ in m.named_parameters():
+                    if name in ['bias']:
+                        nn.init.constant_(m.bias, 0)
         
         if Path(pretrained).is_file():
             pt_dict = torch.load(pretrained)
@@ -641,7 +649,7 @@ class HRNetBase_S4(nn.Module):
         # stage 4
         x_list = []
         for branch_index in range(self.stage4_cfg['NUM_BRANCHES']):
-            if self.transition2[branch_index] is not None:
+            if self.transition3[branch_index] is not None:
                 if branch_index == self.stage4_cfg['NUM_BRANCHES'] - 1:
                     x_list.append(self.transition3[branch_index](y_list[-1]))
                 else:

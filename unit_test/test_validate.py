@@ -16,7 +16,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.transforms as transforms
+import torchvision.transforms as transforms 
 
 import _init_paths
 import dataset
@@ -61,7 +61,7 @@ class AverageMeter(object):
 def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
     # general
-    parser.add_argument('--cfg', help='experiment configure file name', default='experiments/coco/tokenpose/tokenpose_L_D24_256_192_patch43_dim192_depth24_heads12.yaml',
+    parser.add_argument('--cfg', help='experiment configure file name', default='experiments/crowdpose/tokenpose/tokenpose_L_D24_256_192_patch43_dim192_depth24_heads12.yaml',
                         type=str)
     parser.add_argument('opts', help="Modify config options using the command-line", default=None,
                         nargs=argparse.REMAINDER)
@@ -106,8 +106,6 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
         begin = time.time()
         for i, (input, target, target_weight, meta) in enumerate(val_loader):
             outputs = model(input)
-            print(outputs.size())
-            print(target.size())
             if isinstance(outputs, list): output = outputs[-1]
             else: output = outputs
 
@@ -169,9 +167,7 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
 
                 prefix = '{}_{}'.format(str(Path(output_dir) / 'val'), i)
                 save_debug_images(cfg, input, meta, target, pred * 4, output, prefix)
-            
-            break
-    
+                
         # print(image_path)
     
         name_values, pref_indicator = val_dataset.evaluate(
@@ -212,7 +208,7 @@ def test_validate():
     model = eval('models.' + cfg.MODEL.NAME + '.get_pose_net')(
         cfg, is_train=False
     )
-
+    '''
     if cfg.TEST.MODEL_FILE:
         logger.info(f'=> loading model from {cfg.TEST.MODEL_FILE}')
         pretrained_state_dict = torch.load(cfg.TEST.MODEL_FILE)
@@ -228,7 +224,7 @@ def test_validate():
         model_state_file = str(Path(final_output_dir) / 'model_best_perf.pth')
         logger.info(f'=> loading model from {model_state_file}')
         model.load_state_dict(torch.load(model_state_file))
-
+    '''
    
     model = torch.nn.DataParallel(model, device_ids=[0]).cuda()
     

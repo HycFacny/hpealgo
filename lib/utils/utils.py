@@ -3,8 +3,11 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import random
 from pathlib import Path
 from collections import namedtuple
+
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -151,3 +154,9 @@ def save_checkpoint(states, is_best, output_dir, filename='checkpoint.pth'):
     torch.save(states, str(Path(output_dir) / filename))
     if is_best and 'state_dict' in states:
         torch.save(states['best_state_dict'], str(Path(output_dir) / 'model_best_perf.pth'))
+
+
+def init_seeds(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)

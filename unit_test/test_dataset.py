@@ -82,6 +82,74 @@ def test_cocoapi():
             'id': 200887    # annotation index ( unique for every bbox & keypoint annotation )
         }
     '''
+    bbox_ids = coco.getAnnIds(imgIds=image_index[0], iscrowd=False)
+    bboxes = coco.loadAnns(bbox_ids)
+    print(bboxes)
+    
+
+def test_crowdposeapi():
+    dataset_root = Path('/home/huangyuchao/projects/datasets/crowdpose/')
+    # print(dataset_root.exists())
+    anno_file = dataset_root / 'annotations' / 'crowdpose_test.json'
+    coco = COCO(anno_file)
+    
+    CATS = coco.loadCats(coco.getCatIds())
+    print(CATS, type(CATS))
+    print(coco.getCatIds(), type(coco.getCatIds()))
+    cats = [cat['name'] for cat in CATS]
+    print(cats, type(cats))
+
+    image_index = coco.getImgIds()          # e.g. 397133
+    image = coco.loadImgs(image_index[0])
+    '''
+        image basic info annotation, e.g.
+        [{
+            'supercategory': 'person',
+            'id': 1,
+            'name': 'person',
+            'keypoints': [
+                'left_shoulder', 'right_shoulder', 'left_elbow', 'right_elbow', 'left_wrist', 'right_wrist',
+                'left_hip', 'right_hip', 'left_knee', 'right_knee', 'left_ankle', 'right_ankle',
+                'head', 'neck'
+            ],
+            'skeleton': [
+                [12, 13], [13, 0], [13, 1], [0, 2], [2, 4], [1, 3], [3, 5], [13, 7],
+                [13, 6], [7, 9], [9, 11], [6, 8], [8, 10]
+            ]
+        }] 
+        
+        num_images: 8000
+        num_person_instances: 34770
+        num_joints: 14
+    '''
+    print(image_index[0], '\n', image)
+    print('num_images: {}'.format(len(image_index)))
+    bbox_ids = coco.getAnnIds(imgIds=image_index, iscrowd=False)
+    bboxes = coco.loadAnns(bbox_ids)
+    print('num_person_instances: {}'.format(len(bboxes)))
+    '''
+        bbox info annotation, e.g.
+        {
+            'num_keypoints': 5,
+            'iscrowd': 0,
+            'keypoints': [
+                0, 0, 0, 208, 108, 2, 0, 0, 0, 278, 158, 2, 262, 206, 2, 348, 98, 2, 0, 0, 0, 173, 299, 2,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 256, 27, 1, 220, 89, 1
+            ],
+            'image_id': 106848,
+            'bbox': [106.01, 13.43, 273.15, 352.42],
+            'category_id': 1,
+            'id': 123803
+        }
+    '''
+    bbox_ids = coco.getAnnIds(imgIds=image_index[0], iscrowd=False)
+    bboxes = coco.loadAnns(bbox_ids)
+    print(bboxes)
+    for i, bbox in enumerate(bboxes):
+        bbox['area'] = bbox['bbox'][2] * bbox['bbox'][3]
+    
+    print(bboxes)
+    
 
 def test_dataset_base():
     global valid_dataset
@@ -122,5 +190,6 @@ def test_transforms():
 
 if __name__ == '__main__':
     test_cocoapi()
-    test_dataset_base()
-    test_transforms()
+    # test_dataset_base()
+    # test_transforms()
+    test_crowdposeapi()

@@ -6,9 +6,9 @@ import time
 import logging
 from pathlib import Path
 
+import cv2
 import numpy as np
 import torch
-import torch.nn as nn
 
 from core.evaluate import get_accuracy
 from core.evaluate import get_final_preds
@@ -16,6 +16,11 @@ from utils.transforms import flip_back
 from utils.visualizer import save_debug_images
 from utils.print_functions import print_inter_debug_info
 from utils.print_functions import print_inter_name_value
+
+from utils.demo_utils import demo_final_preds
+from utils.demo_utils import draw
+from utils.demo_utils import save_image
+from utils.demo_utils import save_video
 
 
 logger = logging.getLogger(__name__)
@@ -52,17 +57,8 @@ def train(cfg, train_loader, model, criterion, optimizer, epoch, output_dir, ten
     for i, (input, target, target_weight, meta) in enumerate(train_loader):
         # data loading time
         data_time.update(time.time() - begin)
-        # print(data_time.val)
-        # print_inter_debug_info('batch_input_size', input.shape, 'input')
-        # print_inter_debug_info('batch_target_size', target.shape, 'input')
-
-        # compute output
-        # torch.autograd.set_detect_anomaly(True)
-        print(input.size(), input.device)
         outputs = model(input)
-        # print(time.time() - begin - data_time.val)
-        # print(1)
-
+        
         target = target.cuda(non_blocking=True)
         target_weight = target_weight.cuda(non_blocking=True)
 
@@ -125,6 +121,7 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
     model.eval()
 
     num_samples = len(val_dataset)
+    # print(len(val_dataset))
     all_preds = np.zeros(
         (num_samples, cfg.MODEL.NUM_JOINTS, 3),
         dtype=np.float32
@@ -162,7 +159,7 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
             loss = criterion(output, target, target_weight)
 
             num_images = input.size(0)
-
+            
             _, avg_accuracy, cnt, pred = get_accuracy(output.cpu().numpy(), target.cpu().numpy())
             losses.update(loss.item(), num_images)
             accuracy.update(avg_accuracy, cnt)
@@ -189,6 +186,7 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
             image_path.extend(meta['image'])
 
             idx += num_images
+            # print(idx, all_preds.shape[0], all_boxes.shape[0], len(image_path))
 
             if i % cfg.PRINT_FREQ == 0:
                 msg = 'Test: [{0}/{1}] \t' \
@@ -229,3 +227,82 @@ def validate(cfg, val_loader, val_dataset, model, criterion, output_dir, tensorb
 
     return pref_indicator
 
+
+def demo(cfg, model, demo_set, transform, demo_output):
+    video = []
+    in_width, in_height = cfg.MODEL.IMAGE_SIZE
+    
+    model.eval()
+    with torch.no_grad():
+        for i in range(len(demo_set)):
+            or_image, meta = demo_set[i]
+            data_type = meta['data_type']
+            
+            input = transform(cv2.resize(or_image, (in_width, in_height))).unsqueeze(0)
+            outputs = model(input.cuda())
+            
+            if isinstance(outputs, list): output = outputs[-1]
+            else: output = outputs
+            
+            preds = demo_final_preds(cfg, output.detach().cpu().numpy())
+                       
+            out_height, out_width = output.shape[2], output.shape[3]
+            
+            enlarge_ratio_width = int( meta['width'] / out_width  + .5 )
+            enlarge_ratio_height = int( meta['height']  / out_height  + .5 )
+            
+            or_image = draw(or_image, preds, (enlarge_ratio_width, enlarge_ratio_height))
+            
+            if data_type == 'image':
+                save_image(or_image, meta, demo_output)
+            elif data_type == 'video':
+                video.append(or_image)
+                if meta['frame_index'] + 1 == meta['num_frame']:
+                    save_video(video, meta, demo_output)
+                    del video
+                    video = []
+            else:
+                logger.error(f'=> Demo data type {datatype} is not supported.')
+
+def demo_low_resolution(cfg, model, demo_set, transform, demo_output):
+    video = []
+    in_width, in_height = cfg.MODEL.IMAGE_SIZE
+    
+    model.eval()
+    with torch.no_grad():
+        for i in range(len(demo_set)):
+            or_image, meta = demo_set[i]
+            data_type = meta['data_type']
+            
+            or_image = cv2.resize(or_image, (in_width, in_height))
+            input = transform(or_image).unsqueeze(0)
+            outputs = model(input.cuda())
+            
+            print('after model(output)')
+            
+            if isinstance(outputs, list): output = outputs[-1]
+            else: output = outputs
+            
+            preds = demo_final_preds(cfg, output.detach().cpu().numpy())
+            
+            print('preds: ', preds)
+            
+            out_height, out_width = output.shape[2], output.shape[3]
+            
+            enlarge_ratio_width = int( in_width / out_width  + .5 )
+            enlarge_ratio_height = int( in_height / out_height  + .5 )
+            
+            or_image = draw(or_image, preds, (enlarge_ratio_width, enlarge_ratio_height))
+            
+            print('after draw')
+            
+            if data_type == 'image':
+                save_image(or_image, meta, demo_output)
+            elif data_type == 'video':
+                video.append(or_image)
+                if meta['frame_index'] + 1 == meta['num_frame']:
+                    save_video(video, meta, demo_output)
+                    del video
+                    video = []
+            else:
+                logger.error(f'=> Demo data type {datatype} is not supported.')

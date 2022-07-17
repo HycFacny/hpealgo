@@ -27,7 +27,9 @@ from utils.utils import get_projroot
 from utils.utils import get_optimizer
 from utils.utils import get_model_summary
 from utils.utils import save_checkpoint
+from utils.utils import init_seeds
 from utils.print_functions import print_inter_debug_info
+
 
 
 import dataset
@@ -36,6 +38,9 @@ import models
 def main():
     args = parse_args()
     update_config(cfg, args)
+    
+    init_seeds(0)
+    
     logger, final_output_dir, tensorboard_log_dir = create_logger(cfg, args.cfg, 'train')
     logger.info(pprint.pformat(args))
     logger.info(cfg)

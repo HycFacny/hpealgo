@@ -6,18 +6,18 @@ CUDNN:
   ENABLED: True
 DATASET:
   COLOR_RGB: True
-  DATASET: coco
+  DATASET: crowdpose
   DATA_FORMAT: jpg
   FLIP: True
   HYBRID_JOINTS_TYPE: 
   NUM_JOINTS_HALF_BODY: 8
   PROB_HALF_BODY: 0.3
-  ROOT: /home/huangyuchao/projects/datasets/coco2017
+  ROOT: /home/huangyuchao/projects/datasets/crowdpose
   ROT_FACTOR: 45
   SCALE_FACTOR: 0.35
   SELECT_DATA: False
-  TEST_SET: val2017
-  TRAIN_SET: train2017
+  TEST_SET: val
+  TRAIN_SET: train
 DATA_DIR: 
 DEBUG:
   DEBUG: True
@@ -62,7 +62,7 @@ MODEL:
   MULTI_TRANSFORMER_HEADS: [16, 16]
   NAME: tokenpose_l
   NUM_BRANCHES: 1
-  NUM_JOINTS: 17
+  NUM_JOINTS: 14
   PATCH_SIZE: [3, 4]
   POS_EMBEDDING_TYPE: sine-full
   PRETRAINED: /home/huangyuchao/.cache/torch/checkpoints/hrnet_w48-8ef0771d.pth
@@ -80,7 +80,7 @@ TEST:
   BATCH_SIZE_PER_GPU: 16
   BBOX_THRE: 1.0
   BLUR_KERNEL: 11
-  COCO_BBOX_FILE: /data/dataset/COCO_2017/COCO_val2017_detections_AP_H_56_person.json
+  COCO_BBOX_FILE: 
   FLIP_TEST: True
   IMAGE_THRE: 0.0
   IN_VIS_THRE: 0.2

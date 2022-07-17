@@ -103,7 +103,7 @@ def oks_iou(g, d, a_g, a_d, sigmas=None, in_vis_thre=None):
         vd = d[n_d, 2::3]
         dx = xd - xg
         dy = yd - yg
-        e = (dx ** 2 + dy ** 2) / vars / ((a_g + a_d[n_d]) / 2 + np.spacing(1)) / 2
+        e = (dx ** 2 + dy ** 2) / vars[0 : xd.shape[0]] / ((a_g + a_d[n_d]) / 2 + np.spacing(1)) / 2
         if in_vis_thre is not None:
             ind = list(vg > in_vis_thre) and list(vd > in_vis_thre)
             e = e[ind]

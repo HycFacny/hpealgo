@@ -17,14 +17,16 @@ class JointsMSELoss(nn.Module):
         self.use_target_weight = use_target_weight
     
     def forward(self, output, target, target_weight):
-        print_inter_debug_info('Loss Output Size', output.size(), 'loss')
         """
             output: torch.Tensor(batch_size, num_joints, H_hmpsz, W_hmpsz)
             target: torch.Tensor(batch_size, num_joints, H_hmpsz, W_hmpsz)
             target_weight: torch.Tensor(batch_size, num_joints, 1)
         """
+        print_inter_debug_info('Loss Output Size', output.size(), 'loss')
+        
         batch_size = output.size(0)
         num_joints = output.size(1)
+        
         # heatmap_pred: tuple with length = num_joints
         # heatmap_pred[0].shape: [batch_size, 1, H_hmpsz * W_hmpsz]
         heatmap_pred = output.reshape((batch_size, num_joints, -1)).split(1, 1)

@@ -181,8 +181,6 @@ class TokenPose_L_Base(TokenPoseBase):
             MLPHead(hidden_heatmap_dim, heatmap_dim)
         ) if dim * 3 <= hidden_heatmap_dim * 0.5 and apply_multi else MLPHead(dim * 3, heatmap_dim)
 
-        # 
-
     def forward(self, features, mask=None):
         # print(features.shape)
         p_h, p_w = self.patch_size[1], self.patch_size[0]
@@ -207,7 +205,6 @@ class TokenPose_L_Base(TokenPoseBase):
             out += self.pos_embedding[:, :(n + self.num_keypoints)]
         
         out = self.dropout(out)
-        # print(out.shape)
 
         # out: [batch_size, 256 + 17, 192]
         x1 = self.transformer1(out, mask, self.pos_embedding)

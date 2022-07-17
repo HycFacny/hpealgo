@@ -131,9 +131,12 @@ def update_config(cfg, args):
     cfg.merge_from_file(args.cfg)
     cfg.merge_from_list(args.opts)
 
-    if args.modelDir: cfg.OUTPUT_DOR = args.modelDir
-    if args.logDir: cfg.LOG_DIR = args.logDir
-    if args.dataDir: cfg.DATA_DIR = args.dataDir
+    if args.modelDir:
+        cfg.OUTPUT_DOR = args.modelDir
+    if args.logDir: 
+        cfg.LOG_DIR = args.logDir
+    if args.dataDir:
+        cfg.DATA_DIR = args.dataDir
     
     cfg.DATASET.ROOT = \
         str(Path(cfg.DATA_DIR, cfg.DATASET.ROOT))

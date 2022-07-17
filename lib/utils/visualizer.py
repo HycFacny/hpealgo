@@ -11,6 +11,7 @@ import numpy as np
 import torchvision
 
 from core.evaluate import get_max_pred_locations
+from utils.print_functions import print_inter_debug_info
 
 
 def save_debug_images(cfg, input, meta, target, joints_pred, heatmap_pred, prefix):

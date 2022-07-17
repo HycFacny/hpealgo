@@ -15,10 +15,11 @@ from pycocotools.cocoeval import COCOeval
 from .dataset_base import JointsDataset
 from utils.nms.nms import oks_nms
 from utils.nms.nms import soft_oks_nms
+from utils.print_functions import print_inter_debug_info
+
 
 logger = logging.getLogger(__name__)
 
-debug_flag = False
 
 class COCODataset(JointsDataset):
     '''
@@ -43,7 +44,8 @@ class COCODataset(JointsDataset):
     },
 	"skeleton": [
         [16,14],[14,12],[17,15],[15,13],[12,13],[6,12],[7,13], [6,7],[6,8],
-        [7,9],[8,10],[9,11],[2,3],[1,2],[1,3],[2,4],[3,5],[4,6],[5,7]]
+        [7,9],[8,10],[9,11],[2,3],[1,2],[1,3],[2,4],[3,5],[4,6],[5,7]
+    ]
     '''
 
     def __init__(self, cfg, root, image_set, is_train, transform=None):
@@ -74,7 +76,7 @@ class COCODataset(JointsDataset):
         self.num_classes = len(self.classes)
         logger.info(f'=> classes: {self.classes}, loading successfully')
         
-        print(f'loading classes {self.classes}')
+        # print(f'loading classes {self.classes}')
 
         # bind index between coco.index, self.class_index, and cats name
         # self.classes -> self.num_classes
@@ -91,7 +93,7 @@ class COCODataset(JointsDataset):
         self.image_set_index = self._load_image_set_index() # == self.coco.getImgIds()
         self.num_images = len(self.image_set_index)
         logger.info(f'=> images num: {self.num_images}')
-        print(f'loading image {self.num_images}')
+        # print(f'loading image {self.num_images}')
 
         # joints related params
         self.num_joints = 17
@@ -115,8 +117,6 @@ class COCODataset(JointsDataset):
         print(f'loading database samples {len(self.db)}')
 
 
-
-
     #####################################################################
     ''' inner function used for loading and pre-process infos '''
     #####################################################################
@@ -129,7 +129,7 @@ class COCODataset(JointsDataset):
             if 'test' not in self.image_set else 'image_info_'
         dataset_root = Path(self.root)
 
-        return dataset_root / 'annotations' / (prefix + self.image_set + '.json')
+        return str(dataset_root / 'annotations' / (prefix + self.image_set + '.json'))
 
     def _load_image_set_index(self):
         return self.coco.getImgIds()
@@ -227,8 +227,8 @@ class COCODataset(JointsDataset):
 
             rec.append({
                 'image': self._image_path_from_index(index),
-                'center': center,   # np.array
-                'scale': scale,     # np.array
+                'center': center,
+                'scale': scale,
                 'joints_3d': joints_3d,
                 'joints_3d_vis': joints_3d_vis,
                 'filename': '',
@@ -262,8 +262,6 @@ class COCODataset(JointsDataset):
         if center[0] != -1: scale = scale * 1.25
 
         return center, scale
-    
-
 
     #####################################################################
     ''' inner function used for evaluating or testing phase '''
@@ -286,7 +284,7 @@ class COCODataset(JointsDataset):
 
         keypoint_db = []
         num_boxes = 0
-        for n_image in range(0, len(all_boxes)):
+        for n_image in range(len(all_boxes)):
             det_res = all_boxes[n_image]
             if det_res['category_id'] != 1: continue
 
@@ -312,7 +310,7 @@ class COCODataset(JointsDataset):
                 'joints_3d_vis': joints_3d_vis
             })
         
-        logger.info(f'=>Total boxes after filter low score@{self.image_thre}: {num_boxes}')
+        logger.info(f'=> Total boxes after filter low score@{self.image_thre}: {num_boxes}')
         return keypoint_db
     
     # write detection results to file
@@ -342,7 +340,6 @@ class COCODataset(JointsDataset):
             content[-1] = ']'
             with open(res_file, 'w') as f:
                 f.write(c for c in content)
-
 
     # rearrange pack format
     def _load_coco_keypoint_results_percat_kernel(self, pack):
@@ -395,7 +392,6 @@ class COCODataset(JointsDataset):
         
         return info_string
     
-    
     #####################################################################
     ''' evaluate func for validating and testing '''
     #####################################################################
@@ -429,12 +425,6 @@ class COCODataset(JointsDataset):
 
         # {person box: keypoints} with image_name
         kpt_all = []
-        preds = preds[:4]
-        all_boxes = all_boxes[:4]
-        
-        # print(preds.shape)
-        # print(all_boxes.shape)
-        # print(len(image_path))
         
         for idx, kpt in enumerate(preds):
             kpt_all.append({
@@ -446,6 +436,10 @@ class COCODataset(JointsDataset):
                 'image': int(image_path[idx][ -16 : -4 ])
             })
         
+        # for idx, item in enumerate(kpt_all):
+        #     print_inter_debug_info('kpt_all[{}]'.format(idx), item, 'evaluate')
+        
+        
         # print(kpt_all)
         
         # {image_name: {person boxes: keypoints} }
@@ -454,7 +448,7 @@ class COCODataset(JointsDataset):
         
         # rescoring and getting oks nms
         oks_nms_keypoints = []
-        for image in keypoints.keys():
+        for idx, image in enumerate(keypoints.keys()):
             image_keypoints = keypoints[image]
             
             # rescoring
@@ -473,7 +467,7 @@ class COCODataset(JointsDataset):
                 
                 # update person score with mean of theirs keypoints and own box score
                 person['score'] = kpt_score * box_score
-
+                        
             # calculate oks nms
             if self.soft_nms:
                 # keep = soft_oks_nms([image_keypoints[i] for i in range(len(image_keypoints))], self.oks_thre)

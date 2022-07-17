@@ -85,8 +85,8 @@ class JointsDataset(Dataset):
         """
         db_rec = copy.deepcopy(self.db[idx])
         
-        if not self.debug_flag1:
-            self._debug_transforms(idx)
+        # if not self.debug_flag1:
+        #     self._debug_transforms(idx)
 
         image_file = db_rec['image']
         filename = db_rec['filename'] if 'filename' in db_rec else ''
@@ -186,14 +186,6 @@ class JointsDataset(Dataset):
         }
         # print('**********************************************')
 
-        print_func('input', input)
-        print_func('input_size', input.size())
-        print_func('target', target)
-        print_func('target_size', target.size())
-        print_func('target_weight', target_weight)
-        print_func('target_weight_size', target_weight.size())
-        print_func('meta', meta)
-
         return input, target, target_weight, meta
 
     def _get_db(self):
@@ -225,14 +217,9 @@ class JointsDataset(Dataset):
 
         # test half body transform
         if self.check_half_body_condition(joints, rand=False):
-            print_func('center_half', _center)
-            print_func('scale_half', _scale)
             _center_half, _scale_half = self.half_body_transform( joints, joints_vis )
             if _center_half is not None and _scale_half is not None:
                 _center, _scale = _center_half, _scale_half
-        
-            print_func('center_half', _center)
-            print_func('scale_half', _scale)
 
         # test rotation
         alpha = 0.5
@@ -241,15 +228,10 @@ class JointsDataset(Dataset):
         
         _rotation = np.clip(alpha * _rotation_factor, \
                                 -_rotation_factor * 2., _rotation_factor * 2.)
-        print_func('_scale', _scale)
-        print_func('_rotat', _rotation)
-
         _trans_mat = get_affine_transmat(_center, _scale, _rotation, self.image_size)
-        print_func('_transmat', _trans_mat)
 
 
     def half_body_transform(self, joints, joints_vis):
-        # print(joints)
         upper_joints, lower_joints = [], []
         
         # part joints into lower and upper set
@@ -268,9 +250,6 @@ class JointsDataset(Dataset):
         else:
             selected_joints = lower_joints
         if len(selected_joints) < 2: return None, None
-        
-        print_func('upper_joints', upper_joints)
-        print_func('lower_joints', lower_joints)
 
         selected_joints = np.array(selected_joints, dtype=np.float32)
         

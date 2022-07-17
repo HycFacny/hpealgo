@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class SimpleBaselines(nn.Module):
-    
     def __init__(self, block, num_blocks, cfg, **kwargs):
         super().__init__()
         

@@ -54,7 +54,7 @@ class TokenPose_L(nn.Module):
 
 def get_pose_net(cfg, is_train, **kwargs):
     model = TokenPose_L(cfg, **kwargs)
-    print_inter_debug_info('whole_model', model, 'entire_network')
+    # print_inter_debug_info('whole_model', model, 'entire_network')
     if is_train and cfg.MODEL.INIT_WEIGHTS:
         model.init_weights(cfg.MODEL.PRETRAINED, cfg)
     return model

@@ -109,3 +109,12 @@ class Residual(nn.Module):
     def forward(self, x, **kwargs):
         return self.fn(x, **kwargs) + x
 
+
+# class SEBlock(nn.Module):
+#     def __init__(self, in_channels, out_channels):
+#         self.net = nn.Modulelist(
+#             nn.Conv2d(in_channels)
+#         )
+        
+#     def forward(self, x):
+        
