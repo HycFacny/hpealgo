@@ -1,0 +1,48 @@
+........................batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
+batch_input_size: >>>>
+torch.Size([64, 3, 256, 192])
+batch_target_size: >>>>
+torch.Size([64, 17, 64, 48])
